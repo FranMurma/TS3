@@ -1,0 +1,503 @@
+:root {
+    --green-bright: #00ff00;
+    --dark-gray: #272123;
+}
+
+@font-face {
+    font-family: 'Digital-7';
+    src: url('fonts/Digital-7.woff2') format('woff2'),
+        url('fonts/Digital-7.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background-color: var(--dark-gray);
+    color: var(--green-bright);
+    font-family: 'Digital-7', monospace;
+    margin: 0;
+    overflow: hidden;
+}
+
+.main-title {
+    font-size: clamp(6vw, 10vw, 14vh);
+    line-height: 1;
+    color: var(--green-bright);
+    position: relative;
+    z-index: 2;
+    height: 100%;
+}
+
+.rounded-box {
+    display: inline-block;
+    white-space: normal;
+    border: 3px solid var(--green-bright);
+    border-radius: 5mm;
+    background-color: rgba(39, 33, 35, 0.9);
+    position: relative;
+    z-index: 2;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.no-border {
+    border: none; /* Quitar el borde */
+    background: transparent !important; /* Fondo transparente */
+    color: rgba(0, 255, 0, 0.6); /* Texto verde suave, más discreto */
+    font-size: 12px; /* Tamaño de fuente más pequeño */
+}
+
+.no-border:hover {
+    background: transparent, !important; /* Evitar cambio de fondo en hover */
+    color: rgba(0, 255, 0, 0.8); /* El texto se pone un poco más brillante al hacer hover */
+}
+
+/*  Botones inactivos: Apagados y sin hover */
+.option-box.inactive {
+    opacity: 0.5;  /* Hace que se vean más apagados */
+    pointer-events: none; /* No permite clics */
+    cursor: not-allowed; /* Muestra el cursor de prohibido */
+    filter: grayscale(80%); /* Efecto apagado */
+    transition: opacity 0.3s ease-in-out;
+}
+
+
+/* Estilos generales para todos los botones */
+.option-box, #loginBox, #userWelcome {
+    background-color: rgba(39, 33, 35, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 150px;
+    min-height: 40px;
+    padding: 8px;
+    border-radius: 5mm;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+/* hover para option-box, loginBox y userWelcome */
+.option-box:hover, #loginBox:hover, #userWelcome:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.5);
+    background-color: rgba(39, 33, 35, 0.9) !important; /* ✅ Mantiene el fondo gris oscuro */
+}
+
+
+
+/*  Al hacer clic, solo se resalta el texto sin modificar el borde ni el fondo */
+.option-box:active, #loginBox:active, #userWelcome:active, 
+.menu-option:active, [data-menu='play']:active {
+    transform: scale(1.1);
+    text-shadow: 0px 0px 15px rgba(0, 255, 0, 0.8);
+    box-shadow: none;
+    background-color: rgba(39, 33, 35, 0.9) !important; /* ✅ Mantiene el fondo gris oscuro */
+    border: 3px solid var(--green-bright);
+}
+
+
+
+
+
+/*  Caja Expandida */
+/*  Ajuste para que el login se expanda lateralmente como el Play */
+/*  Asegurar que el menú no se meta detrás ni adelante */
+.login-options {
+    position: absolute;
+    top: 0;
+    left: 100%; /*  Por defecto, al lado derecho */
+    margin-left: 10px; /*  Margen para evitar que se pegue al botón */
+    width: 280px;
+    background-color: rgba(39, 33, 35, 0.9);
+    border-right: 3px solid var(--green-bright);
+    border-top: 3px solid var(--green-bright);
+    border-radius: 0 5mm 5mm 5mm;
+    padding: 15px;
+    box-shadow: 5px 0px 10px rgba(0, 255, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out, transform 0.3s ease-in-out;
+    z-index: 10;
+}
+
+/*  Cuando el menú está visible */
+.login-options.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scaleY(1);
+}
+
+
+.login-options.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: scaleY(0);
+}
+
+/*  Estilo de opciones */
+.login-option {
+    padding: 10px;
+    text-align: left;
+    background: rgba(0, 255, 0, 0.1);
+    border-radius: 3mm;
+    cursor: pointer;
+    margin-bottom: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+.login-option:hover {
+    background: rgba(0, 255, 0, 0.3);
+}
+
+.separator {
+    height: 2px;
+    width: 100%;
+    background: linear-gradient(90deg, var(--green-bright), transparent);
+    margin: 5px auto;
+}
+
+.title-box {
+    height: calc(2 * 8.33%);
+}
+
+
+
+
+/*  EFECTO MATRIX */
+.matrix-effect {
+    position: relative;
+    background-color: var(--dark-gray);
+    overflow: hidden;
+    height: 100vh;
+    z-index: 1;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 0;
+}
+
+.section-divider {
+    position: absolute;
+    top: 110%;
+    height: 4px;
+    width: 16%;
+}
+
+.section-divider.left {
+    left: 0%;
+    background: linear-gradient(90deg, var(--green-bright), transparent 80%);
+}
+
+.section-divider.right {
+    background: linear-gradient(-90deg, var(--green-bright), transparent 80%);
+    right: 0%;
+}
+
+.vertical-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--green-bright);
+    transform: scaleX(0.1);
+    will-change: transform;
+    z-index: 2;
+}
+
+.divider-left {
+    left: calc(7.5% - 0.5px);
+}
+
+.divider-right {
+    right: calc(7.5% - 0.5px);
+}
+
+/*  Aseguramos que el canvas del juego ocupe bien el espacio */
+#juego {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out;
+    background-color: black;
+    z-index: 0;
+}
+
+
+/*  Menú desplegable de Play (misma estructura que login-options) */
+#playMenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 10px;
+    width: 280px;
+    background-color: rgba(39, 33, 35, 0.9);
+    border-right: 3px solid var(--green-bright);
+    border-top: 3px solid var(--green-bright);
+    border-radius: 0 5mm 5mm 5mm;
+    padding: 15px;
+    box-shadow: 5px 0px 10px rgba(0, 255, 0, 0.3);
+    opacity: 0;  /*  Inicialmente oculto */
+    visibility: hidden; /*  Evita que bloquee eventos */
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/*  Mostrarlo cuando sea visible */
+#playMenu.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scaleY(1);
+}
+
+
+/*  Opciones dentro del menú de Play */
+.play-option {
+    padding: 10px;
+    text-align: left;
+    background: rgba(0, 255, 0, 0.1);
+    border-radius: 3mm;
+    cursor: pointer;
+    margin-bottom: 5px;
+    transition: background 0.3s ease-in-out;
+}
+
+.play-option:hover {
+    background: rgba(0, 255, 0, 0.3);
+}
+
+
+
+hr {
+    width: 90%;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+
+#toggle-2fa {
+    background: rgba(255, 255, 255, 0.1);
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 3mm;
+    transition: background 0.3s ease-in-out;
+}
+
+#toggle-2fa:hover {
+    background: rgba(255, 0, 0, 0.2);
+}
+
+
+/*  Efecto de resplandor solo en el texto cuando el botón está activo */
+.menu-option.active,
+[data-menu='play'].active,
+[data-menu='settings'].active,
+[data-menu='credits'].active {
+    color: #00ff00;
+    font-weight: bold;
+    text-shadow: 0px 0px 12px rgba(0, 255, 0, 0.8);
+    background: rgba(39, 33, 35, 0.9) !important; /* ✅ Mantiene el fondo gris oscuro */
+    border: 3px solid var(--green-bright);
+    animation: subtleGlow 1.5s infinite alternate;
+}
+
+
+#loginBox.active,
+#userWelcome.active {
+    color: #00ff00;
+    font-weight: bold;
+    text-shadow: 0px 0px 8px rgba(0, 255, 0, 0.8);
+    background: rgba(0, 255, 0, 0.2);
+    border: 2px solid #00ff00;
+    transition: background 0.3s ease-in-out, border 0.2s ease-in-out;
+}
+
+
+/* Efecto de resplandor pulsante */
+/*  Animación de iluminación para el texto */
+@keyframes subtleGlow {
+    0% { text-shadow: 0px 0px 6px rgba(0, 255, 0, 0.5); }
+    50% { text-shadow: 0px 0px 12px rgba(0, 255, 0, 0.6); }
+    100% { text-shadow: 0px 0px 6px rgba(0, 255, 0, 0.5); }
+}
+
+
+
+
+
+
+
+/*  Evitar efectos duplicados en el texto */
+#userWelcome strong {
+    font-weight: bold;
+    text-shadow: none;
+    background: transparent;
+}
+
+/*  Animación de iluminación */
+@keyframes subtleGlow {
+    0% { box-shadow: 0px 0px 6px rgba(0, 255, 0, 0.5); }
+    50% { box-shadow: 0px 0px 12px rgba(0, 255, 0, 0.6); }
+    100% { box-shadow: 0px 0px 6px rgba(0, 255, 0, 0.5); }
+}
+
+
+
+
+
+
+
+
+/*  En tablets (menos de 1024px), eliminamos UNA columna Matrix */
+@media (max-width: 1024px) {
+    .matrix-effect,
+    .vertical-divider { 
+        display: none;
+    }
+
+    .col-10 {
+        margin-left: 0;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    .option-box {
+        display: block;
+        margin-left: 0;
+    }
+}
+
+/*  En móviles (menos de 768px), ocultamos ambas columnas Matrix */
+@media (max-width: 768px) {
+    .matrix-effect,
+    .vertical-divider {
+        display: none;
+    }
+    
+    .col-10 {
+        margin-left: 0;
+        margin-right: auto;
+        text-align: left;
+    }
+
+    .option-box {
+        font-size: clamp(10px, 3vw, 16px);
+        padding: 6px;
+    }
+}
+
+@media (max-width: 600px) {
+    #playMenu {
+        left: auto;
+        right: 100%;
+        margin-left: 0;
+        margin-right: 10px;
+    }
+}
+
+/*  En móviles aún más pequeños (menos de 480px) */
+@media (max-width: 480px) {
+    .option-box {
+        font-size: 4vw;
+        padding: 4px;
+    }
+}
+
+
+/*** Idiomas ***/
+.language-dropdown {
+    position: absolute;
+    visibility: hidden; /* Oculto visualmente, pero presente en el DOM */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    background-color: black; 
+    color: rgba(0, 255, 0, 0.7);
+    border: none !important;
+    padding: 5px;
+    font-size: 14px;
+    width: 120px;
+    outline: none;
+}
+
+/* Mostrar el selector cuando esté activo */
+.language-dropdown.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+/*  Si se hace clic, que NO tenga borde ni cambie de fondo */
+#languageBox:active, #languageBox.active {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: rgba(0, 255, 0, 1); /* ✅ Opcional: más brillo en el texto */
+}
+
+#languageBox:hover {
+    color: rgba(0, 255, 0, 0.8); /* ✅ Se pone un poco más brillante */
+    box-shadow: none !important;
+
+}
+
+/* Estilos para los modales */
+.modal-content {
+    background-color: var(--dark-gray); /* Fondo oscuro */
+    color: var(--green-bright); /* Texto verde brillante */
+    border: 1px solid var(--green-bright); /* Borde verde brillante */
+}
+
+/* Estilos del título del modal */
+.modal-header {
+    background-color: var(--dark-gray);
+    color: var(--green-bright);
+}
+
+/* Estilos para los botones del modal */
+.modal-footer .btn {
+    background-color: var(--green-bright);
+    color: var(--dark-gray);
+    border: none;
+}
+
+.modal-footer .btn:hover {
+    background-color: #00cc00; /* Un verde un poco más oscuro al pasar el ratón */
+}
+
+/* Estilo para el modal cuando está visible */
+.modal.show {
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro transparente */
+}
+
+/* Ajustes para el cierre del modal */
+.modal-header .btn-close {
+    background-color: var(--dark-gray);
+    color: var(--green-bright);
+}
+
+.modal-header .btn-close:hover {
+    background-color: #00cc00;
+    color: var(--dark-gray);
+}
