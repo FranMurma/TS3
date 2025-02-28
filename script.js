@@ -684,7 +684,16 @@ function showMenu(menu) {
                 }
         
                 if (option.id === "toggle-2fa") {
-                    toggleTwoFA();
+                    let twoFAModal = new bootstrap.Modal(document.getElementById("twoFAModal"));
+                    twoFAModal.show();
+                    let confirm2FA = document.getElementById("confirm2FA");
+                    confirm2FA.replaceWith(confirm2FA.cloneNode(true));
+                    confirm2FA = document.getElementById("confirm2FA");
+                    confirm2FA.addEventListener("click", function () {
+                        console.log("✅ 2FA Enabled!");
+                        option.textContent = "Disable 2FA";
+                        twoFAModal.hide();
+                    });
                     return;
                 }
         
@@ -702,17 +711,22 @@ function openEditModal(type) {
     let modalTitle = document.getElementById("editModalLabel");
     let modalInput = document.getElementById("editModalInput");
     let saveButton = document.getElementById("saveEdit");
-    let cancelButton = document.querySelector("#editModal .btn-secondary");
+    let cancelButton = document.querySelector("#editModal .btn-secondary"); // Botón de cancelar
 
+    // **Asegurar que el modal y los elementos existen**
     if (!modalTitle || !modalInput || !saveButton || !cancelButton) {
         console.error("❌ No se encontraron los elementos del modal.");
         return;
     }
 
+    // **Obtener idioma actual**
     let lang = localStorage.getItem("language") || "en";
-    modalInput.value = "";
-    modalInput.type = "text"; 
 
+    // **Resetear input antes de cambiar tipo**
+    modalInput.value = "";
+    modalInput.type = "text"; // Resetear a texto por defecto
+
+    // **Asignar textos según el idioma**
     if (type === "edit-username") {
         modalTitle.textContent = translations[lang]["edit-username"];
         modalInput.placeholder = translations[lang]["edit-username-placeholder"];
@@ -726,135 +740,39 @@ function openEditModal(type) {
         modalInput.type = "email";
     }
 
+    // **Traducir botones del modal**
     saveButton.textContent = translations[lang]["save-button"];
     cancelButton.textContent = translations[lang]["cancel-button"];
 
+    // **Abrir el modal correctamente con Bootstrap**
     let modal = new bootstrap.Modal(document.getElementById("editModal"));
     modal.show();
 
+    // **Reemplazar botón para evitar múltiples eventos**
     let newSaveButton = saveButton.cloneNode(true);
     saveButton.replaceWith(newSaveButton);
-    saveButton = newSaveButton;
+    saveButton = newSaveButton; // Reasignamos el botón
 
+    // **Asignar nuevo evento al botón de guardar**
     saveButton.onclick = function () {
         let newValue = modalInput.value.trim();
         if (!newValue) {
-            alert(translations[lang]["empty-field-alert"]);
+            alert(translations[lang]["empty-field-alert"]); // Traducir alerta
             return;
         }
-
-        updateProfile(type, newValue, modal);
-    };
-}
-
-/*
-    // 🔴 Versión anterior (Descomentar si hay problemas con la nueva)
-    function openEditModal(type) {
-        let modalTitle = document.getElementById("editModalLabel");
-        let modalInput = document.getElementById("editModalInput");
-        let saveButton = document.getElementById("saveEdit");
-        let cancelButton = document.querySelector("#editModal .btn-secondary");
-
-        if (!modalTitle || !modalInput || !saveButton || !cancelButton) {
-            console.error("❌ No se encontraron los elementos del modal.");
-            return;
-        }
-
-        let lang = localStorage.getItem("language") || "en";
-        modalInput.value = "";
-        modalInput.type = "text"; 
 
         if (type === "edit-username") {
-            modalTitle.textContent = translations[lang]["edit-username"];
-            modalInput.placeholder = translations[lang]["edit-username-placeholder"];
+            console.log(`Nombre de usuario cambiado a: ${newValue}`);
         } else if (type === "edit-password") {
-            modalTitle.textContent = translations[lang]["edit-password"];
-            modalInput.placeholder = translations[lang]["edit-password-placeholder"];
-            modalInput.type = "password";
+            console.log("Contraseña actualizada correctamente.");
         } else if (type === "edit-email") {
-            modalTitle.textContent = translations[lang]["edit-email"];
-            modalInput.placeholder = translations[lang]["edit-email-placeholder"];
-            modalInput.type = "email";
+            console.log(`Email cambiado a: ${newValue}`);
         }
 
-        saveButton.textContent = translations[lang]["save-button"];
-        cancelButton.textContent = translations[lang]["cancel-button"];
-
-        let modal = new bootstrap.Modal(document.getElementById("editModal"));
-        modal.show();
-
-        let newSaveButton = saveButton.cloneNode(true);
-        saveButton.replaceWith(newSaveButton);
-        saveButton = newSaveButton;
-
-        saveButton.onclick = function () {
-            let newValue = modalInput.value.trim();
-            if (!newValue) {
-                alert(translations[lang]["empty-field-alert"]);
-                return;
-            }
-
-            if (type === "edit-username") {
-                console.log(`Nombre de usuario cambiado a: ${newValue}`);
-            } else if (type === "edit-password") {
-                console.log("Contraseña actualizada correctamente.");
-            } else if (type === "edit-email") {
-                console.log(`Email cambiado a: ${newValue}`);
-            }
-
-            modal.hide();
-        };
-    }
-*/
-
-function updateProfile(type, newValue) {
-    console.log(`🔄 Enviando actualización de perfil para: ${type}`);
-
-    const accessToken = getCookie("access_token"); // Ahora usamos getCookie en lugar de localStorage
-    if (!accessToken) {
-        console.error("❌ No se encontró un token de acceso. El usuario debe volver a iniciar sesión.");
-        alert("Session expired. Please log in again.");
-        logoutUser();
-        return;
-    }
-
-    const updateData = {};
-    updateData[type] = newValue; // Asigna dinámicamente el campo a actualizar
-
-    fetch("http://localhost:8000/api/update-profile", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(updateData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log(`✅ ${type} actualizado con éxito: ${newValue}`);
-            alert("Profile updated successfully!");
-
-            // Actualizar la UI si es necesario
-            if (type === "username") {
-                document.getElementById("usernameDisplay").textContent = newValue;
-            }
-        } else {
-            console.warn(`⚠️ Error al actualizar ${type}:`, data.error);
-            alert("Failed to update profile. Please try again.");
-        }
-    })
-    .catch(error => {
-        console.error("❌ Error en la actualización del perfil:", error);
-        alert("An error occurred. Please check your connection.");
-    });
-
-    // Si necesitas el modal, descomenta la siguiente línea:
-    // modal.hide();
+        // **Cerrar modal después de guardar**
+        modal.hide();
+    };
 }
-
-
-
 
 
 // El modal se cierra correctamente sin dejar la pantalla bloqueada
@@ -876,137 +794,8 @@ document.addEventListener("hidden.bs.modal", function () {
         document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
         document.body.classList.remove('modal-open');
         document.body.style.overflow = "";
-    }, 100);
+    }, 300);
 });
-
-
-saveButton.onclick = function () {
-    let newValue = modalInput.value.trim();
-    if (!newValue) {
-        alert(translations[lang]["empty-field-alert"]);
-        return;
-    }
-
-    console.log(`🔄 Enviando actualización para: ${type} con valor: ${newValue}`);
-
-    // Convertir 'edit-username' a 'username', 'edit-email' a 'email', etc.
-    const profileField = type.replace("edit-", "");
-
-    // Llamar a la función updateProfile con el tipo correcto
-    updateProfile(profileField, newValue);
-
-    // Cerrar el modal correctamente
-    let modalInstance = bootstrap.Modal.getInstance(document.getElementById("editModal"));
-    if (modalInstance) {
-        modalInstance.hide();
-    }
-};
-
-
-function toggleTwoFA() {
-    console.log("🔄 Cambiando estado de 2FA...");
-
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) {
-        console.error("❌ No hay token de sesión. No se puede cambiar 2FA.");
-        return;
-    }
-
-    fetch("http://localhost:8000/api/toggle-2fa/", {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log(`✅ 2FA ${data.enabled ? "activado" : "desactivado"} correctamente.`);
-            
-            let toggle2FAOption = document.getElementById("toggle-2fa");
-            if (toggle2FAOption) {
-                toggle2FAOption.textContent = data.enabled ? translations[localStorage.getItem("language") || "en"]["disable-2fa"] : translations[localStorage.getItem("language") || "en"]["enable-2fa"];
-            }
-        } else {
-            console.warn("⚠️ Error al cambiar estado de 2FA:", data.message);
-            alert(data.message);
-        }
-    })
-    .catch(error => {
-        console.error("❌ Error en la solicitud de 2FA:", error);
-    });
-}
-
-
-function checkAndRefreshToken() {
-    console.log("🔄 Verificando si el token ha expirado...");
-
-    return new Promise((resolve) => {
-        const accessToken = getCookie("access_token");
-        const refreshToken = getCookie("refresh_token");
-
-        if (!accessToken) {
-            console.warn("⚠️ No hay access token. El usuario debe volver a iniciar sesión.");
-            resolve(false);
-            return;
-        }
-
-        fetch("http://localhost:8000/api/check-token/", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${accessToken}`,
-                "Content-Type": "application/json"
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.valid) {
-                console.warn("⚠️ Token expirado, intentando refrescar...");
-
-                if (!refreshToken) {
-                    console.error("❌ No hay refresh token. Se requiere nuevo inicio de sesión.");
-                    resolve(false);
-                    return;
-                }
-
-                fetch("http://localhost:8000/api/refresh-token/", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ refresh: refreshToken })
-                })
-                .then(response => response.json())
-                .then(refreshData => {
-                    if (refreshData.access) {
-                        console.log("✅ Token refrescado exitosamente.");
-                        setCookie("access_token", refreshData.access, 1);
-                        resolve(true);
-                    } else {
-                        console.error("❌ No se pudo refrescar el token. Se requiere nuevo login.");
-                        resolve(false);
-                    }
-                })
-                .catch(error => {
-                    console.error("❌ Error en la solicitud de refresh token:", error);
-                    resolve(false);
-                });
-
-            } else {
-                console.log("✅ Token válido.");
-                resolve(true);
-            }
-        })
-        .catch(error => {
-            console.error("❌ Error al verificar el token:", error);
-            resolve(false);
-        });
-    });
-}
-
-
-
 
 
 
@@ -1048,7 +837,7 @@ function handleMenuClick(eventOrSection) {
 
 // Redirigir a la autenticación de 42
 function loginWithIntra() {
-    const useRealAuth = true; /// OJO!!! para seguir haciendo pruebas offline: Cambia a false para activar la simulación!
+    const useRealAuth = false; /// OJO!!! para seguir haciendo pruebas offline: Cambia a false para activar la simulación!
 
     if (useRealAuth) {
         console.log("🔵 Redirigiendo a la autenticación con intra 42...");
@@ -1083,7 +872,7 @@ function loginWithIntra() {
 
 
 function checkIntraLogin() {
-    const useRealAuth = true; /// OJO!!! Cambia a `false` si quieres pruebas offline
+    const useRealAuth = false; /// OJO!!! Cambia a `false` si quieres pruebas offline
 
     if (useRealAuth) {
         console.log("Verificando autenticación con 42...");
@@ -1108,15 +897,8 @@ function checkIntraLogin() {
             const savedRefreshToken = getCookie('refresh_token');
 
             if (savedAccessToken && savedRefreshToken) {
-                console.log("✅ Sesión encontrada en cookies. Verificando validez...");
-                
-                checkAndRefreshToken().then(isValid => {
-                    if (isValid) {
-                        autenticarUsuario();
-                    } else {
-                        console.warn("⚠️ Token inválido o expirado. Se requiere nuevo inicio de sesión.");
-                    }
-                });
+                console.log("✅ Sesión encontrada en cookies. Restaurando...");
+                autenticarUsuario();
             } else {
                 console.warn("⚠️ No hay sesión activa.");
             }
@@ -1133,7 +915,6 @@ function checkIntraLogin() {
         }, 1000);
     }
 }
-
 
 // Función que autentifica al usuario y maneja la UI
 function autenticarUsuario() {
@@ -1179,7 +960,7 @@ function sendSignInRequest(email, password) {
 
 
 function handleSignUp() {
-    const useRealAuth = true; /// OJO!!! Cambiar a false para pruebas offline.
+    const useRealAuth = false; /// OJO!!! Cambiar a false para pruebas offline.
     const username = document.getElementById("signUpUsername").value.trim();
     const email = document.getElementById("signUpEmail").value.trim();
     const password = document.getElementById("signUpPassword").value.trim();
@@ -1254,7 +1035,7 @@ function sendSignUpRequest(username, email, password) {
 
 
 function handleSignIn() {
-    const useRealAuth = true; /// OJO!!! Cambia a false para pruebas offline.
+    const useRealAuth = false; /// OJO!!! Cambia a false para pruebas offline.
     const email = document.getElementById("signInEmail").value.trim();
     const password = document.getElementById("signInPassword").value.trim();
 
